@@ -76,11 +76,61 @@ class Organization():
                 name_company,
                 adress=None,
                 phone=None,
+                boss=None,
+                site=None,
+                email=None,
+                file=False
                 ):
-        self.url_link = 'https://mysbor.ru' + url_link
+        if file:
+            self.url_link = url_link
+        else:
+            self.url_link = BASE_URL + url_link
         self.name_company = name_company
         self.adress = adress
         self.phone = phone
+        self.boss = boss
+        self.site = site
+        self.email = email
+        self.file = file
+    
+    # def update_atr(self, param, value):
+        
+
+    def get_param(self):
+        soup = open_data_html(
+            self.url_link,
+            self.file
+        )
+        parameters = soup.find('div', {'class': 'param'})
+        items = parameters.find_all('div', {'class': 'item'})
+        for item in items:
+            result = re.search(
+                '[\w\-]+',
+                clear_value(item.find('div', {'class': 'col-xs-4 col-md-3'}).text)
+                ).group(0)
+            param, value = self.get_item(result, item)
+            self.__dict__[param] = value
+
+    def get_item(self, text: str, item: str):
+        base_dict = {
+            'Адрес': ('adress', self.get_data(item)),
+            'Телефон': ('phone', self.get_data(item)),
+            'Руководитель': ('boss', self.get_data(item)),
+            'Сайт': ('site', self.get_data(item)),
+            'E-mail': ('email', self.get_data(item))
+        }
+
+        for _ in base_dict.keys():
+            if _ == text:
+                return base_dict.get(_)
+        return f'{text} - не найдено в справочнике'
+
+    def get_data(self, item):
+        result = clear_value(item.find('div', {'class': 'col-xs-8 col-md-9'}).text)
+        if result:
+            return result
+        else:
+            return None
 
 class ParseMainSpravochnik():
     '''
@@ -160,7 +210,7 @@ if __name__ == "__main__":
     #     print(name_company, url_link)
 
     # # проверка работы парса страницы со списком организаций из интернета
-    # url_obsluz = '/spravochnik/gorodskie_sluzhby/obsluzhivayuwie_organizacii/'
+    # url_obsluz = '/spravochnik/dosug_otdyh_i_razvlecheniya/detskie_ozdorovitel_nye_lagerya/'
     # test2 = ListOrganizationParser(url_obsluz)
     # for name_company, url_link in test2.lst_organisations:
     #     print(name_company, url_link)
@@ -175,4 +225,15 @@ if __name__ == "__main__":
     #         category = ListOrganizationParser(url_link)
     #         for name_company, link_company in category.lst_organisations:
     #             print(name_company, url_link)
-    pass
+
+    # # проверка парсинга параметров организации
+    # base_url = 'data/org.html'
+    # company = Organization(base_url, 'Чайка', file=True)
+    # company.get_param()
+    # print(company.__dict__)
+
+    # проверка парсинга параметров организации из интернета
+    base_url = '/spravochnik/1528/'
+    company = Organization(base_url, '"Парус" профильный лагерь для одаренных детей')
+    company.get_param()
+    print(company.__dict__)
