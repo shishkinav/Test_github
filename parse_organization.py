@@ -165,4 +165,14 @@ if __name__ == "__main__":
     # for name_company, url_link in test2.lst_organisations:
     #     print(name_company, url_link)
     
-
+    # # проверка парсинга из интернета с использованием комплекса классов
+    # spravochnik = ParseMainSpravochnik()
+    # print('*'*10, 'ПАРСИМ ВСЕ РАЗДЕЛЫ','*'*10)
+    # for main_category, lst_second_category in spravochnik.dict_category.items():
+    #     print('*'*10, f'РАБОТАЕМ С РАЗДЕЛОМ {main_category}','*'*10)
+    #     for name_second_category, url_link in lst_second_category:
+    #         print('*'*10, f'РАБОТАЕМ С ПОДРАЗДЕЛОМ {name_second_category}','*'*10)
+    #         category = ListOrganizationParser(url_link)
+    #         for name_company, link_company in category.lst_organisations:
+    #             print(name_company, url_link)
+    pass
