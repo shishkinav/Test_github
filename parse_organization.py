@@ -11,7 +11,7 @@ def open_data_html(url_link, file=False):
         with open(url_link) as html_doc:
             soup = BeautifulSoup(html_doc, 'html.parser')
     else:
-        r = requests.get(BASE_URL + url_link)
+        r = requests.get(url_link)
         soup = BeautifulSoup(r.content, 'html.parser')
     return soup
 
@@ -92,9 +92,6 @@ class Organization():
         self.site = site
         self.email = email
         self.file = file
-    
-    # def update_atr(self, param, value):
-        
 
     def get_param(self):
         soup = open_data_html(
@@ -104,12 +101,15 @@ class Organization():
         parameters = soup.find('div', {'class': 'param'})
         items = parameters.find_all('div', {'class': 'item'})
         for item in items:
-            result = re.search(
-                '[\w\-]+',
-                clear_value(item.find('div', {'class': 'col-xs-4 col-md-3'}).text)
-                ).group(0)
-            param, value = self.get_item(result, item)
-            self.__dict__[param] = value
+            try:
+                result = re.search(
+                    '[\w\-]+',
+                    clear_value(item.find('div', {'class': 'col-xs-4 col-md-3'}).text)
+                    ).group(0)
+                param, value = self.get_item(result, item)
+                self.__dict__[param] = value
+            except:
+                continue
 
     def get_item(self, text: str, item: str):
         base_dict = {
@@ -233,7 +233,8 @@ if __name__ == "__main__":
     # print(company.__dict__)
 
     # проверка парсинга параметров организации из интернета
-    base_url = '/spravochnik/1528/'
-    company = Organization(base_url, '"Парус" профильный лагерь для одаренных детей')
-    company.get_param()
-    print(company.__dict__)
+    # base_url = '/spravochnik/1528/'
+    # company = Organization(base_url, 'Парус')
+    # company.get_param()
+    # print(company.__dict__)
+    pass
