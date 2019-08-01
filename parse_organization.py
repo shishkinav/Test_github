@@ -39,6 +39,8 @@ class ListOrganizationParser():
         )
         
     def unpack(self, url_link, file=False):
+        if not file:
+            url_link = BASE_URL + url_link
         soup = open_data_html(
             url_link=url_link,
             file=file
@@ -167,6 +169,8 @@ class ParseMainSpravochnik():
         )
     
     def unpack(self, url_link, file=False):
+        if not file:
+            url_link = BASE_URL + url_link
         soup = open_data_html(
             url_link=url_link,
             file=file
