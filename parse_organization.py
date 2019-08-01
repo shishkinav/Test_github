@@ -79,6 +79,7 @@ class Organization():
                 boss=None,
                 site=None,
                 email=None,
+                link_logo=None,
                 file=False
                 ):
         if file:
@@ -91,6 +92,7 @@ class Organization():
         self.boss = boss
         self.site = site
         self.email = email
+        self.link_logo = link_logo
         self.file = file
 
     def get_param(self):
@@ -110,7 +112,12 @@ class Organization():
                 self.__dict__[param] = value
             except:
                 continue
-
+        try:
+            logo_info = soup.find('table', {'class': 'info'})
+            link_logo = logo_info.find('img').get('src')
+            self.__dict__['link_logo'] = BASE_URL + link_logo
+        except:
+            pass
     def get_item(self, text: str, item: str):
         base_dict = {
             'Адрес': ('adress', self.get_data(item)),
@@ -232,9 +239,9 @@ if __name__ == "__main__":
     # company.get_param()
     # print(company.__dict__)
 
-    # проверка парсинга параметров организации из интернета
+    # # проверка парсинга параметров организации из интернета
     # base_url = '/spravochnik/1528/'
-    # company = Organization(base_url, 'Парус')
+    # company = Organization(base_url, 'СТРОЙБАЗА "РЫБИНСКАЯ"')
     # company.get_param()
     # print(company.__dict__)
     pass
