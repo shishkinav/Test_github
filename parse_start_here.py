@@ -7,6 +7,40 @@ from parse_organization import (
 
 
 
+def parse_second_cat(
+                    name_main_category, choice_1,
+                    name_second_category, choice_2,
+                    link_second_cat
+                ):
+    # работаем по очереди с каждым подразделом
+    data = []
+    relative_path_file_csv = f'data/20190802_{choice_1}_{choice_2}_organizations.csv'
+    category = ListOrganizationParser(link_second_cat)
+    for name_company, link_company in category.lst_organisations:
+        tmp_lst = [name_main_category, name_second_category]
+        company = Organization(link_company, name_company)
+        company.get_param()
+        tmp_lst += [
+            company.name_company,
+            company.url_link,
+            company.adress,
+            company.phone,
+            company.boss,
+            company.site,
+            company.email,
+            company.link_logo
+        ]
+        data.append(dict(zip(fieldnames, tmp_lst)))
+        print(f'Данные {company.name_company} получены.')
+    # записываем данные в csv файл
+    csv_dict_writer(
+        relative_path_file_csv,
+        fieldnames,
+        data
+    )
+    print(f'Файл {relative_path_file_csv} сохранён.')
+
+
 fieldnames = [
     'main_category',
     'second_category',
@@ -37,39 +71,18 @@ for number, data in enumerate(spravochnik.dict_category.values()):
         }
 for k, v in cat_second.items():
     print(f'[{k}] - {v[0]}')
-choice_2 = int(input('\nВведите номер подраздела:\n'))
-# забираем данные для старта парсинга подраздела
-for k, v in cat_second.items():
-    if k == choice_2:
-        name_second_category, link_second_cat = v
+choice_2 = int(input('\nВведите номер подраздела (если хотите спарсить весь раздел введите "0"):\n'))
+if choice_2 != 0:
+    # забираем данные для старта парсинга подраздела
+    for k, v in cat_second.items():
+        if k == choice_2:
+            name_second_category, link_second_cat = v
 
-# три переменные образованы для парсинга
-print(name_main_category, name_second_category, link_second_cat)
-
-# работаем по очереди с каждым подразделом
-data = []
-relative_path_file_csv = f'data/20190802_{choice_1}_{choice_2}_organizations.csv'
-category = ListOrganizationParser(link_second_cat)
-for name_company, link_company in category.lst_organisations:
-    tmp_lst = [name_main_category, name_second_category]
-    company = Organization(link_company, name_company)
-    company.get_param()
-    tmp_lst += [
-        company.name_company,
-        company.url_link,
-        company.adress,
-        company.phone,
-        company.boss,
-        company.site,
-        company.email,
-        company.link_logo
-    ]
-    data.append(dict(zip(fieldnames, tmp_lst)))
-    print(f'Данные {company.name_company} получены.')
-# записываем данные в csv файл
-csv_dict_writer(
-    relative_path_file_csv,
-    fieldnames,
-    data
-)
-print(f'Файл {relative_path_file_csv} сохранён.')
+    # три переменные образованы для парсинга
+    # print(name_main_category, name_second_category, link_second_cat)
+    parse_second_cat(name_main_category, choice_1, name_second_category, choice_2, link_second_cat)
+else:
+    choice_2 = 1
+    for name_second_category, link_second_cat in cat_second.values():
+        parse_second_cat(name_main_category, choice_1, name_second_category, choice_2, link_second_cat)
+        choice_2 += 1
