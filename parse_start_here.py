@@ -58,7 +58,7 @@ for name_company, link_company in category.lst_organisations:
         company.name_company,
         company.url_link,
         company.adress,
-        company.adress,
+        company.phone,
         company.boss,
         company.site,
         company.email,

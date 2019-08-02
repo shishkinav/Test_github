@@ -10,10 +10,11 @@ def open_data_html(url_link, file=False):
     if file:
         with open(url_link) as html_doc:
             soup = BeautifulSoup(html_doc, 'html.parser')
+        return soup
     else:
         r = requests.get(url_link)
         soup = BeautifulSoup(r.content, 'html.parser')
-    return soup
+        return soup
 
 
 def clear_value(value: str):
@@ -99,18 +100,22 @@ class Organization():
 
     def get_param(self):
         soup = open_data_html(
-            self.url_link,
-            self.file
+            url_link=self.url_link,
+            file=self.file
         )
         parameters = soup.find('div', {'class': 'param'})
+        # print(parameters)
         items = parameters.find_all('div', {'class': 'item'})
         for item in items:
+            # print(item,'\n')
             try:
                 result = re.search(
                     '[\w\-]+',
                     clear_value(item.find('div', {'class': 'col-xs-4 col-md-3'}).text)
                     ).group(0)
+                # print(result, type(result))
                 param, value = self.get_item(result, item)
+                # print('param - ' + param, ' value - ', value)
                 self.__dict__[param] = value
             except:
                 continue
@@ -123,23 +128,48 @@ class Organization():
     def get_item(self, text: str, item: str):
         base_dict = {
             'Адрес': ('adress', self.get_data(item)),
-            'Телефон': ('phone', self.get_data(item)),
+            'Телефон': ('phone', self.get_phone(item)),
             'Руководитель': ('boss', self.get_data(item)),
             'Сайт': ('site', self.get_data(item)),
             'E-mail': ('email', self.get_data(item))
         }
-
+        # print(text, type(text), item)
         for _ in base_dict.keys():
+            # print('Текст сопоставления - ', _ , ' и ', text)
             if _ == text:
+                # print(_, ' ', item)
                 return base_dict.get(_)
         return f'{text} - не найдено в справочнике'
 
     def get_data(self, item):
         result = clear_value(item.find('div', {'class': 'col-xs-8 col-md-9'}).text)
         if result:
+            # print('Возврат - ' + result)
             return result
         else:
             return None
+
+    def get_phone(self, item):
+        pattern = '[78]*[\s-]*\(*\d+\)*[\s-]*\d+[\s-]*\d+[\s-]*\d+'
+        data = re.findall(pattern, item.text)
+        result = []
+        for i in data:
+            if len(i) > 0:
+                result += [clear_value(i)]
+        return ', '.join(result)
+        
+        # data = item.find_all('div', {'class': 'telnumber'})
+        # pattern = '[78]*[\s-]*\(\d+\)[\s-]*\d+[\s-]*\d+[\s-]*\d+'
+        # for i in data:
+        #     result = re.search(pattern, i.text).group(0)
+        #     # print(result, ' data result', len(result) > 0)
+        #     # result = clear_value(', '.join(result))
+        #     print(result, ' check data')
+        # if result:
+        #     print(result)
+        #     return result
+        # else:
+        #     return None
 
 class ParseMainSpravochnik():
     '''
@@ -244,8 +274,10 @@ if __name__ == "__main__":
     # print(company.__dict__)
 
     # # проверка парсинга параметров организации из интернета
-    # base_url = '/spravochnik/1528/'
-    # company = Organization(base_url, 'СТРОЙБАЗА "РЫБИНСКАЯ"')
+    # base_url = '/spravochnik/2428/'
+    # # base_url = 'data/org.html'
+    # company = Organization(base_url, 'СТРОЙБАЗА "РЫБИНСКАЯ"') # , file=True
     # company.get_param()
     # print(company.__dict__)
+    # print(company.phone)
     pass
