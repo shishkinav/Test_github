@@ -6,7 +6,6 @@ from parse_organization import (
 )
 
 
-
 def parse_second_cat(
                     name_main_category, choice_1,
                     name_second_category, choice_2,
@@ -41,6 +40,33 @@ def parse_second_cat(
     print(f'Файл {relative_path_file_csv} сохранён.')
 
 
+def create_readme_catalog(spravochnik):
+    cat_main = {number: key for number, key in enumerate(spravochnik.dict_category.keys(), start=1)}
+    fieldnames = [
+        'number_main_category',
+        'name_main_category',
+        'number_second_category',
+        'name_second_category'
+    ]
+    relative_path_readme_catalog = 'data/READme_catalog.csv'
+    info = []
+    for number, name_main_category in cat_main.items():
+        for number_main_category, data in enumerate(spravochnik.dict_category.values()):
+            
+            if number_main_category == number:
+                cat_second = {
+                    number: key[0] for number, key in enumerate(data, start=1)
+                }
+                for number_second_category, name_second_category in cat_second.items():
+                    tmp_lst = [number_main_category, name_main_category, number_second_category, name_second_category]
+                    info.append(dict(zip(fieldnames, tmp_lst)))
+    csv_dict_writer(
+                    relative_path_readme_catalog,
+                    fieldnames,
+                    info
+                )
+
+
 fieldnames = [
     'main_category',
     'second_category',
@@ -56,33 +82,38 @@ fieldnames = [
 
 # приступаем к массовому парсингу ресурса
 spravochnik = ParseMainSpravochnik()
-# словарь разделов
-cat_main = {number: key for number, key in enumerate(spravochnik.dict_category.keys(), start=1)}
-for k, v in cat_main.items():
-    print(f'[{k}] - {v}')
-choice_1 = int(input('\nВведите номер раздела:\n'))
-name_main_category = cat_main.get(choice_1)
 
-# словарь подкатегорий выбранного раздела для выбора пользователем
-for number, data in enumerate(spravochnik.dict_category.values()):
-    if number == choice_1:
-        cat_second = {
-            number: key for number, key in enumerate(data, start=1)
-        }
-for k, v in cat_second.items():
-    print(f'[{k}] - {v[0]}')
-choice_2 = int(input('\nВведите номер подраздела (если хотите спарсить весь раздел введите "0"):\n'))
-if choice_2 != 0:
-    # забираем данные для старта парсинга подраздела
-    for k, v in cat_second.items():
-        if k == choice_2:
-            name_second_category, link_second_cat = v
-
-    # три переменные образованы для парсинга
-    # print(name_main_category, name_second_category, link_second_cat)
-    parse_second_cat(name_main_category, choice_1, name_second_category, choice_2, link_second_cat)
+choice = input('Введите "Y" если хотите только сформировать каталог разделов и подкатегорий:\n')
+if choice == 'Y' or choice == 'y':
+    create_readme_catalog(spravochnik)
 else:
-    choice_2 = 1
-    for name_second_category, link_second_cat in cat_second.values():
+    # словарь разделов
+    cat_main = {number: key for number, key in enumerate(spravochnik.dict_category.keys(), start=1)}
+    for k, v in cat_main.items():
+        print(f'[{k}] - {v}')
+    choice_1 = int(input('\nВведите номер раздела:\n'))
+    name_main_category = cat_main.get(choice_1)
+
+    # словарь подкатегорий выбранного раздела для выбора пользователем
+    for number, data in enumerate(spravochnik.dict_category.values()):
+        if number == choice_1:
+            cat_second = {
+                number: key for number, key in enumerate(data, start=1)
+            }
+    for k, v in cat_second.items():
+        print(f'[{k}] - {v[0]}')
+    choice_2 = int(input('\nВведите номер подраздела (если хотите спарсить весь раздел введите "0"):\n'))
+    if choice_2 != 0:
+        # забираем данные для старта парсинга подраздела
+        for k, v in cat_second.items():
+            if k == choice_2:
+                name_second_category, link_second_cat = v
+
+        # три переменные образованы для парсинга
+        # print(name_main_category, name_second_category, link_second_cat)
         parse_second_cat(name_main_category, choice_1, name_second_category, choice_2, link_second_cat)
-        choice_2 += 1
+    else:
+        choice_2 = 1
+        for name_second_category, link_second_cat in cat_second.values():
+            parse_second_cat(name_main_category, choice_1, name_second_category, choice_2, link_second_cat)
+            choice_2 += 1
