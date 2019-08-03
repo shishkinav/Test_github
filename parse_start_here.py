@@ -67,6 +67,58 @@ def create_readme_catalog(spravochnik):
                 )
 
 
+def parse_all_site(spravochnik):
+    cat_main = {number: key for number, key in enumerate(spravochnik.dict_category.keys(), start=1)}
+    fieldnames = [
+            'main_category',
+            'second_category',
+            'name_company',
+            'url_link',
+            'adress',
+            'phone',
+            'boss',
+            'site',
+            'email',
+            'link_logo'
+    ]
+    
+    for number, name_main_category in cat_main.items():
+        for number_main_category, data in enumerate(spravochnik.dict_category.values()):
+            if number_main_category == number:
+                cat_second = {
+                    number: (key[0], key[1]) for number, key in enumerate(data, start=1)
+                }
+                for number_second_category, (name_second_category, link_second_category) in cat_second.items():
+                    info = []
+                    # print(number_second_category, (name_second_category, link_second_category))
+                    relative_path_file_csv = f'data/{number_main_category}_{number_second_category}.csv'
+                    category_lst = ListOrganizationParser(link_second_category)
+                    for name_company, url_link_company in category_lst.lst_organisations:
+                        tmp_lst = [name_main_category, name_second_category]
+                        company = Organization(url_link_company, name_company)
+                        company.get_param()
+                        tmp_lst += [
+                            company.name_company,
+                            company.url_link,
+                            company.adress,
+                            company.phone,
+                            company.boss,
+                            company.site,
+                            company.email,
+                            company.link_logo
+                        ]
+                        info.append(dict(zip(fieldnames, tmp_lst)))
+                    csv_dict_writer(
+                        relative_path_file_csv,
+                        fieldnames,
+                        info
+                    )
+                    print(
+                        f'Подкатегория {name_second_category} из раздела {name_main_category} обработана\
+                            создан файл {relative_path_file_csv}'
+                    )
+
+
 fieldnames = [
     'main_category',
     'second_category',
@@ -83,9 +135,19 @@ fieldnames = [
 # приступаем к массовому парсингу ресурса
 spravochnik = ParseMainSpravochnik()
 
-choice = input('Введите "Y" если хотите только сформировать каталог разделов и подкатегорий:\n')
+choice = input('''
+        Введите:
+        Y - чтобы создать READme каталог
+        A - чтобы запустить парсинг всего сайта целиком
+        другие символы - чтобы перейти к выбору разделов / подкатегорий.
+    ''')
+
 if choice == 'Y' or choice == 'y':
     create_readme_catalog(spravochnik)
+    print('READme файл сформирован')
+elif choice == 'A' or choice == 'a':
+    parse_all_site(spravochnik)
+    print('ПОЗДРАВЛЯЕМ ПАРСИНГ ВСЕГО САЙТА ЗАВЕРШЕН')
 else:
     # словарь разделов
     cat_main = {number: key for number, key in enumerate(spravochnik.dict_category.keys(), start=1)}
