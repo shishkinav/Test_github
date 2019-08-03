@@ -13,7 +13,7 @@ def parse_second_cat(
                 ):
     # работаем по очереди с каждым подразделом
     data = []
-    relative_path_file_csv = f'data/20190802_{choice_1}_{choice_2}_organizations.csv'
+    relative_path_file_csv = f'data/{choice_1}_{choice_2}.csv'
     category = ListOrganizationParser(link_second_cat)
     for name_company, link_company in category.lst_organisations:
         tmp_lst = [name_main_category, name_second_category]
@@ -51,7 +51,7 @@ def create_readme_catalog(spravochnik):
     relative_path_readme_catalog = 'data/READme_catalog.csv'
     info = []
     for number, name_main_category in cat_main.items():
-        for number_main_category, data in enumerate(spravochnik.dict_category.values()):
+        for number_main_category, data in enumerate(spravochnik.dict_category.values(), start=1):
             
             if number_main_category == number:
                 cat_second = {
@@ -83,7 +83,7 @@ def parse_all_site(spravochnik):
     ]
     
     for number, name_main_category in cat_main.items():
-        for number_main_category, data in enumerate(spravochnik.dict_category.values()):
+        for number_main_category, data in enumerate(spravochnik.dict_category.values(), start=1):
             if number_main_category == number:
                 cat_second = {
                     number: (key[0], key[1]) for number, key in enumerate(data, start=1)
@@ -157,7 +157,7 @@ else:
     name_main_category = cat_main.get(choice_1)
 
     # словарь подкатегорий выбранного раздела для выбора пользователем
-    for number, data in enumerate(spravochnik.dict_category.values()):
+    for number, data in enumerate(spravochnik.dict_category.values(), start=1):
         if number == choice_1:
             cat_second = {
                 number: key for number, key in enumerate(data, start=1)
